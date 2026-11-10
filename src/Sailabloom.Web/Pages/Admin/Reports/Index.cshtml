@@ -1,0 +1,106 @@
+@page
+@model Sailabloom.Web.Pages.Admin.Reports.IndexModel
+@{
+    ViewData["Title"] = "Admin — Sales reports";
+
+    // Chart geometry: NET revenue bars scaled to the largest month.
+    double maxNet = Model.Monthly.Count > 0 ? (double)Model.Monthly.Max(m => m.Net) : 0;
+    if (maxNet <= 0) { maxNet = 1; }
+    const int chartHeight = 170;
+    const int baseline = 185;
+    const int barWidth = 34;
+    const int barGap = 48;
+}
+
+<section class="page-section">
+    <h1>Sales reports</h1>
+
+    <nav class="admin-nav" aria-label="Admin">
+        <a asp-page="/Admin/Index">Dashboard</a>
+        <a asp-page="/Admin/Plants/Index">Plants &amp; stock</a>
+        <a asp-page="/Admin/Orders/Index">Orders</a>
+        <a asp-page="/Admin/IssueReports/Index">Issue reports</a>
+        <a asp-page="/Admin/Reports/Index">Sales reports</a>
+    </nav>
+
+    <div class="stat-grid">
+        <div class="stat-card">
+            <div class="stat-label">Gross sales</div>
+            <div class="stat-value">@Model.Summary.Gross.ToString("C")</div>
+        </div>
+        <div class="stat-card refunds">
+            <div class="stat-label">Total refunds</div>
+            <div class="stat-value">@Model.Summary.Refunds.ToString("C")</div>
+        </div>
+        <div class="stat-card net">
+            <div class="stat-label">NET sales</div>
+            <div class="stat-value">@Model.Summary.Net.ToString("C")</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Orders</div>
+            <div class="stat-value">@Model.Summary.OrderCount</div>
+        </div>
+    </div>
+
+    <div class="card" style="margin-bottom:22px;">
+        <h2>NET revenue by month (last 12 months)</h2>
+        <svg viewBox="0 0 620 220" style="width:100%; height:auto;" role="img" aria-label="Bar chart of net revenue by month">
+            <line x1="30" y1="@baseline" x2="610" y2="@baseline" stroke="#173f2c" stroke-width="1.5" />
+            @for (var i = 0; i < Model.Monthly.Count; i++)
+            {
+                var month = Model.Monthly[i];
+                var height = Math.Max(0, (double)month.Net / maxNet * chartHeight);
+                var x = 38 + i * barGap;
+                var y = baseline - height;
+                <rect x="@x" y="@y.ToString("0", System.Globalization.CultureInfo.InvariantCulture)" width="@barWidth" height="@height.ToString("0", System.Globalization.CultureInfo.InvariantCulture)" fill="#256d46" rx="4">
+                    <title>@month.MonthLabel — NET @month.Net.ToString("C")</title>
+                </rect>
+                @Html.Raw($"<text x=\"{(x + barWidth / 2).ToString()}\" y=\"202\" text-anchor=\"middle\" font-size=\"9\" fill=\"#6b7a6e\">{month.MonthLabel.Split(' ')[0]}</text>")                
+                @if (month.Net > 0)
+                {
+                    @Html.Raw($"<text x=\"{(x + barWidth / 2).ToString(System.Globalization.CultureInfo.InvariantCulture)}\" y=\"{(y - 4).ToString("0", System.Globalization.CultureInfo.InvariantCulture)}\" text-anchor=\"middle\" font-size=\"9\" fill=\"#173f2c\">{month.Net.ToString("C0")}</text>")
+                }
+            }
+        </svg>
+        <table class="table" style="box-shadow:none;">
+            <thead><tr><th>Month</th><th>Gross</th><th>Refunds</th><th>NET</th></tr></thead>
+            <tbody>
+                @foreach (var month in Model.Monthly)
+                {
+                    <tr>
+                        <td>@month.MonthLabel</td>
+                        <td>@month.Gross.ToString("C")</td>
+                        <td>@month.Refunds.ToString("C")</td>
+                        <td><strong>@month.Net.ToString("C")</strong></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+        <p class="muted">Cancelled orders are excluded from gross; refunds are netted in the month they are issued. Replacements are $0 and never appear as revenue.</p>
+    </div>
+
+    <div class="card">
+        <h2>Sales by category</h2>
+        @if (Model.Categories.Count == 0)
+        {
+            <p class="muted">No sales yet.</p>
+        }
+        else
+        {
+            <table class="table" style="box-shadow:none;">
+                <thead><tr><th>Category</th><th>Revenue</th><th>Share</th><th></th></tr></thead>
+                <tbody>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <tr>
+                            <td>@category.Category</td>
+                            <td>@category.Amount.ToString("C")</td>
+                            <td>@category.Percent%</td>
+                            <td style="width:40%;"><div class="share-bar"><div style="width:@category.Percent.ToString("0", System.Globalization.CultureInfo.InvariantCulture)%"></div></div></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+    </div>
+</section>

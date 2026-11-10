@@ -1,0 +1,15 @@
+@page
+@model Sailabloom.Web.Pages.ErrorModel
+@{
+    ViewData["Title"] = "Error";
+}
+
+<section class="page-section">
+    <h1>Something went wrong</h1>
+    <p>Sorry — an error occurred while processing your request. Please try again.</p>
+    @if (Model.ShowRequestId)
+    {
+        <p class="muted">Request ID: <code>@Model.RequestId</code></p>
+    }
+    <p><a class="btn btn-primary" asp-page="/Index">Back to the shop</a></p>
+</section>

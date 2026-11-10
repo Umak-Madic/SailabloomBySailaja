@@ -1,0 +1,66 @@
+@page
+@model Sailabloom.Web.Pages.CartModel
+@{
+    ViewData["Title"] = "Cart";
+}
+
+<section class="page-section">
+    <h1>Your cart</h1>
+
+    @if (Model.Items.Count == 0)
+    {
+        <div class="card">
+            <p>Your cart is empty.</p>
+            <p><a class="btn btn-primary" asp-page="/Shop">Browse plants</a></p>
+        </div>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Plant</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Line total</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model.Items)
+                {
+                    var stock = Model.StockByPlant.TryGetValue(item.PlantId, out var s) ? s : item.Quantity;
+                    <tr>
+                        <td><strong>@item.Name</strong><br /><span class="muted">@stock in stock</span></td>
+                        <td>@item.Price.ToString("C")</td>
+                        <td>
+                            <form method="post" asp-page-handler="Update" asp-route-plantId="@item.PlantId" style="display:flex; gap:8px; align-items:center;">
+                                <input class="form-control" style="width:80px;" type="number" name="quantity" value="@item.Quantity" min="0" max="@stock" />
+                                <button type="submit" class="btn btn-secondary btn-small">Update</button>
+                            </form>
+                        </td>
+                        <td>@((item.Price * item.Quantity).ToString("C"))</td>
+                        <td>
+                            <form method="post" asp-page-handler="Remove" asp-route-plantId="@item.PlantId">
+                                <button type="submit" class="btn btn-danger btn-small">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="card" style="margin-top:20px;">
+            <p><strong>Subtotal:</strong> @Model.Subtotal.ToString("C")</p>
+            <p class="muted">Shipping is chosen at checkout: standard shipping $15.00, your own pre-paid label $0, or pickup at home $0.
+               Quantities are capped at current stock, and stock is only claimed when you place the order — first come, first served.</p>
+            <p>
+                <a class="btn btn-primary" asp-page="/Checkout">Go to checkout</a>
+                <a class="btn btn-secondary" asp-page="/Shop">Keep shopping</a>
+            </p>
+            <form method="post" asp-page-handler="Clear">
+                <button type="submit" class="btn btn-secondary btn-small">Clear cart</button>
+            </form>
+        </div>
+    }
+</section>

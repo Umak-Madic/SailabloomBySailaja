@@ -1,0 +1,174 @@
+@page "{id:int}"
+@model Sailabloom.Web.Pages.Admin.Orders.DetailsModel
+@{
+    ViewData["Title"] = "Admin — Order details";
+}
+
+<section class="page-section">
+    <h1>Order details</h1>
+
+    <nav class="admin-nav" aria-label="Admin">
+        <a asp-page="/Admin/Index">Dashboard</a>
+        <a asp-page="/Admin/Plants/Index">Plants &amp; stock</a>
+        <a asp-page="/Admin/Orders/Index">Orders</a>
+        <a asp-page="/Admin/IssueReports/Index">Issue reports</a>
+        <a asp-page="/Admin/Reports/Index">Sales reports</a>
+    </nav>
+
+    @if (Model.Message is not null)
+    {
+        <div class="alert alert-success">@Model.Message</div>
+    }
+    @if (Model.Error is not null)
+    {
+        <div class="alert alert-error">@Model.Error</div>
+    }
+
+    @if (Model.Order is null)
+    {
+        <div class="card"><p>That order no longer exists.</p></div>
+    }
+    else
+    {
+        var order = Model.Order;
+        var refunded = order.Refunds.Sum(r => r.Amount);
+        var refundable = order.Total - refunded;
+
+        <div class="card" style="margin-bottom:20px;">
+            <h2>Order #@order.Id — @order.Status</h2>
+            <table class="table">
+                <tbody>
+                    <tr><td><strong>Customer</strong></td><td>@order.CustomerName (@order.Email)</td></tr>
+                    <tr><td><strong>Address</strong></td><td>@(order.Address ?? "— pickup, no address needed")</td></tr>
+                    <tr><td><strong>Placed</strong></td><td>@order.CreatedUtc.ToLocalTime().ToString("f")</td></tr>
+                    <tr><td><strong>Payment</strong></td><td>@order.PaymentMethod — @order.PaymentStatusText @if (order.CardLast4 is not null) { <span>(@order.CardBrand •••• @order.CardLast4)</span> }</td></tr>
+                    <tr><td><strong>Delivery</strong></td><td>@order.Fulfillment — shipping @order.ShippingCost.ToString("C")</td></tr>
+                    <tr><td><strong>Total</strong></td><td>@order.Total.ToString("C") (plants @order.Subtotal.ToString("C") + shipping @order.ShippingCost.ToString("C"))</td></tr>
+                    <tr><td><strong>Refunded so far</strong></td><td>@refunded.ToString("C") — refundable balance @refundable.ToString("C")</td></tr>
+                </tbody>
+            </table>
+
+            <h3 style="margin-top:18px;">Items</h3>
+            <table class="table">
+                <thead><tr><th>Plant</th><th>Qty</th><th>Unit price</th><th>Line total</th></tr></thead>
+                <tbody>
+                    @foreach (var item in order.Items)
+                    {
+                        <tr><td>@item.PlantName</td><td>@item.Quantity</td><td>@item.UnitPrice.ToString("C")</td><td>@item.LineTotal.ToString("C")</td></tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>Advance status</h3>
+                <form method="post" asp-page-handler="Advance">
+                    <div class="form-group">
+                        <label for="newStatus">New status</label>
+                        <select class="form-control" id="newStatus" name="newStatus">
+                            <option value="Placed" selected="@(order.Status == OrderStatus.Placed)">Placed</option>
+                            <option value="Shipped" selected="@(order.Status == OrderStatus.Shipped)">Shipped</option>
+                            <option value="Delivered" selected="@(order.Status == OrderStatus.Delivered)">Delivered</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Update status</button>
+                </form>
+
+                <h3 style="margin-top:26px;">Issue a refund</h3>
+                <form method="post" asp-page-handler="Refund">
+                    <div class="form-group">
+                        <label for="refundAmount">Amount ($)</label>
+                        <input class="form-control" type="number" step="0.01" min="0.01" max="@refundable" id="refundAmount" name="refundAmount" value="@refundable.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" />
+                    </div>
+                    <div class="form-group">
+                        <label for="refundReason">Reason (required)</label>
+                        <select class="form-control" id="refundReason" name="refundReason" asp-items="Html.GetEnumSelectList<RefundReason>()"></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="refundNote">Note (optional)</label>
+                        <input class="form-control" id="refundNote" name="refundNote" />
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" name="restock" value="true" />
+                            Restock the items (only if the plants came back healthy or never shipped — a dead plant is never restocked)
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Record refund</button>
+                    <p class="muted">Card refunds are recorded against the original card (demo — no real money moves).
+                       Zelle refunds start as “send manually” until you mark them sent below. Cash refunds are handed back in cash.</p>
+                </form>
+
+                <h3 style="margin-top:26px;">Cancel this order</h3>
+                <form method="post" asp-page-handler="Cancel" onsubmit="return confirm('Cancel this order? Unshipped items go back into stock and any money still owed is recorded as a refund.');">
+                    <button type="submit" class="btn btn-danger">Cancel order (unshipped only)</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h3>Send a free replacement</h3>
+                <form method="post" asp-page-handler="Replace">
+                    <div class="form-group">
+                        <label for="orderItemId">Item</label>
+                        <select class="form-control" id="orderItemId" name="orderItemId">
+                            @foreach (var item in order.Items)
+                            {
+                                <option value="@item.Id">@item.PlantName (ordered @item.Quantity)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity">Replacement quantity</label>
+                        <input class="form-control" type="number" min="1" id="quantity" name="quantity" value="1" />
+                    </div>
+                    <button type="submit" class="btn btn-secondary">Claim replacement from stock</button>
+                    <p class="muted">Replacements are $0 and never count as revenue. If stock is too low, you'll be asked to refund instead.</p>
+                </form>
+
+                @if (order.Replacements.Count > 0)
+                {
+                    <h4>Replacements sent</h4>
+                    <ul>
+                        @foreach (var replacement in order.Replacements)
+                        {
+                            <li>@replacement.Quantity × @replacement.PlantName — @replacement.CreatedUtc.ToLocalTime().ToString("g")</li>
+                        }
+                    </ul>
+                }
+
+                <h3 style="margin-top:26px;">Refunds on this order</h3>
+                @if (order.Refunds.Count == 0)
+                {
+                    <p class="muted">No refunds yet.</p>
+                }
+                else
+                {
+                    <table class="table">
+                        <thead><tr><th>Date</th><th>Amount</th><th>Reason</th><th>Method</th><th>Status</th><th></th></tr></thead>
+                        <tbody>
+                            @foreach (var refund in order.Refunds.OrderByDescending(r => r.CreatedUtc))
+                            {
+                                <tr>
+                                    <td>@refund.CreatedUtc.ToLocalTime().ToString("g")</td>
+                                    <td>@refund.Amount.ToString("C")</td>
+                                    <td>@refund.Reason @if (refund.Note is not null) { <span class="muted">— @refund.Note</span> }</td>
+                                    <td>@refund.Method</td>
+                                    <td>@refund.Status</td>
+                                    <td>
+                                        @if (refund.Status == RefundStatus.PendingManualSend)
+                                        {
+                                            <form method="post" asp-page-handler="MarkSent" asp-route-refundId="@refund.Id">
+                                                <button type="submit" class="btn btn-primary btn-small">Mark Zelle refund sent</button>
+                                            </form>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    }
+</section>

@@ -1,0 +1,49 @@
+@page "{id:int}"
+@model Sailabloom.Web.Pages.Admin.Plants.EditModel
+@{
+    ViewData["Title"] = "Admin — Edit plant";
+}
+
+<section class="page-section">
+    <h1>Edit plant</h1>
+
+    <form method="post" class="card" style="max-width:640px;">
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+        <div class="form-group">
+            <label asp-for="Input.Name">Name</label>
+            <input asp-for="Input.Name" class="form-control" />
+            <span asp-validation-for="Input.Name" class="field-validation-error"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.Category">Category</label>
+            <input asp-for="Input.Category" class="form-control" />
+            <span asp-validation-for="Input.Category" class="field-validation-error"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.Price">Price ($)</label>
+            <input asp-for="Input.Price" class="form-control" />
+            <span asp-validation-for="Input.Price" class="field-validation-error"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.Stock">Stock</label>
+            <input asp-for="Input.Stock" class="form-control" />
+            <span asp-validation-for="Input.Stock" class="field-validation-error"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.Description">Description</label>
+            <textarea asp-for="Input.Description" class="form-control"></textarea>
+            <span asp-validation-for="Input.Description" class="field-validation-error"></span>
+        </div>
+        <div class="form-group">
+            <label asp-for="Input.ImageUrl">Image URL</label>
+            <input asp-for="Input.ImageUrl" class="form-control" />
+            <span asp-validation-for="Input.ImageUrl" class="field-validation-error"></span>
+        </div>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+        <a class="btn btn-secondary" asp-page="/Admin/Plants/Index">Cancel</a>
+    </form>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

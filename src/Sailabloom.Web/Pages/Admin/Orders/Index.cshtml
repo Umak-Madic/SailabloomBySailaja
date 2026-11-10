@@ -1,0 +1,56 @@
+@page
+@model Sailabloom.Web.Pages.Admin.Orders.IndexModel
+@{
+    ViewData["Title"] = "Admin — Orders";
+}
+
+<section class="page-section">
+    <h1>Orders</h1>
+
+    <nav class="admin-nav" aria-label="Admin">
+        <a asp-page="/Admin/Index">Dashboard</a>
+        <a asp-page="/Admin/Plants/Index">Plants &amp; stock</a>
+        <a asp-page="/Admin/Orders/Index">Orders</a>
+        <a asp-page="/Admin/IssueReports/Index">Issue reports</a>
+        <a asp-page="/Admin/Reports/Index">Sales reports</a>
+    </nav>
+
+    @if (Model.Orders.Count == 0)
+    {
+        <div class="card"><p class="muted">No orders yet.</p></div>
+    }
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Date</th>
+                    <th>Customer</th>
+                    <th>Items</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Delivery</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr>
+                        <td>@order.Id</td>
+                        <td>@order.CreatedUtc.ToLocalTime().ToString("g")</td>
+                        <td><strong>@order.CustomerName</strong><br /><span class="muted">@order.Email</span></td>
+                        <td>@order.Items.Sum(i => i.Quantity)</td>
+                        <td>@order.Total.ToString("C")</td>
+                        <td>@order.PaymentMethod<br /><span class="muted">@order.PaymentStatusText</span></td>
+                        <td>@order.Fulfillment (@order.ShippingCost.ToString("C"))</td>
+                        <td>@order.Status</td>
+                        <td><a class="btn btn-secondary btn-small" asp-page="/Admin/Orders/Details" asp-route-id="@order.Id">Manage</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</section>

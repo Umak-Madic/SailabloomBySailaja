@@ -1,0 +1,36 @@
+## Visual Studio / .NET
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+[Ll]og/
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+artifacts/
+
+## NuGet
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+
+## Local databases (SQLite dev files)
+*.db
+*.db-shm
+*.db-wal
+
+## Uploads created at runtime
+**/wwwroot/uploads/reports/*
+
+## OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+*.swp

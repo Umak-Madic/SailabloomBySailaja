@@ -1,0 +1,55 @@
+@page
+@model Sailabloom.Web.Pages.Admin.Plants.IndexModel
+@{
+    ViewData["Title"] = "Admin — Plants";
+}
+
+<section class="page-section">
+    <h1>Plants &amp; stock</h1>
+
+    <nav class="admin-nav" aria-label="Admin">
+        <a asp-page="/Admin/Index">Dashboard</a>
+        <a asp-page="/Admin/Plants/Index">Plants &amp; stock</a>
+        <a asp-page="/Admin/Orders/Index">Orders</a>
+        <a asp-page="/Admin/IssueReports/Index">Issue reports</a>
+        <a asp-page="/Admin/Reports/Index">Sales reports</a>
+    </nav>
+
+    <p><a class="btn btn-primary" asp-page="/Admin/Plants/Create">Add a plant</a></p>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Stock</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var plant in Model.Plants)
+            {
+                <tr>
+                    <td><strong>@plant.Name</strong></td>
+                    <td>@plant.Category</td>
+                    <td>@plant.Price.ToString("C")</td>
+                    <td>
+                        @if (plant.Stock <= 0)
+                        {
+                            <span class="badge badge-out">Sold out</span>
+                        }
+                        else
+                        {
+                            @plant.Stock
+                        }
+                    </td>
+                    <td>
+                        <a class="btn btn-secondary btn-small" asp-page="/Admin/Plants/Edit" asp-route-id="@plant.Id">Edit</a>
+                        <a class="btn btn-danger btn-small" asp-page="/Admin/Plants/Delete" asp-route-id="@plant.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</section>

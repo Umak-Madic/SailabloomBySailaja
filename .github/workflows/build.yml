@@ -1,0 +1,29 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore
+        run: dotnet restore Sailabloom.sln
+
+      - name: Build (Release)
+        run: dotnet build Sailabloom.sln --configuration Release --no-restore
+
+      - name: Test (Release)
+        run: dotnet test Sailabloom.sln --configuration Release --no-build --verbosity normal

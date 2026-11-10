@@ -1,0 +1,84 @@
+@page
+@model Sailabloom.Web.Pages.GuaranteeModel
+@{
+    ViewData["Title"] = "Arrive-Alive Guarantee & Refunds";
+}
+
+<section class="page-section policy">
+    <h1>Arrive-Alive Guarantee &amp; Refunds</h1>
+
+    <div class="card">
+        <h2>Our promise</h2>
+        <p>Plants are living things, and shipping is the hardest part of their journey.
+           If your plant arrives <strong>dead or damaged</strong>, we will make it right —
+           that is the Sailabloom promise.</p>
+
+        <h3>How it works</h3>
+        <ul>
+            <li>Report the problem <strong>within 48 hours of delivery</strong> using the form below, with a <strong>photo</strong> of the plant.</li>
+            <li>Choose a <strong>free replacement</strong> (shipped at no cost to you) or a <strong>full refund including shipping</strong>.</li>
+            <li>You never need to return the dead plant — please compost it or give it a corner of the garden, just in case.</li>
+        </ul>
+
+        <h3>Refunds by payment method</h3>
+        <ul>
+            <li><strong>Card:</strong> refunded back to the original card.</li>
+            <li><strong>Zelle:</strong> we send the money back to you by Zelle (Zelle has no built-in refund, so we send it manually and confirm with you).</li>
+            <li><strong>Cash pickup:</strong> refunded in cash when we see you.</li>
+        </ul>
+
+        <h3>What is not covered</h3>
+        <p>Plants that arrive healthy but struggle later from care, weather, or pests are not
+           covered after the 48-hour arrival window — but write to us anyway; we are always
+           happy to help with care advice.</p>
+        <p class="muted">To keep plants safe we ship Monday–Wednesday and hold orders during
+           extreme heat or cold snaps.</p>
+    </div>
+</section>
+
+<section class="page-section">
+    <h2>Report a problem</h2>
+
+    @if (Model.Submitted)
+    {
+        <div class="alert alert-success">
+            Thank you — your report is in. We will review the photo and reply about your replacement or refund shortly.
+        </div>
+    }
+    else
+    {
+        <form method="post" enctype="multipart/form-data" class="card">
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+            <p class="muted">Enter the order number and the email you used at checkout. For your privacy,
+               we show one general message if they don't match — we never reveal order details here.</p>
+            <div class="form-group">
+                <label asp-for="Input.OrderId">Order number</label>
+                <input asp-for="Input.OrderId" class="form-control" />
+                <span asp-validation-for="Input.OrderId" class="field-validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Email">Checkout email</label>
+                <input asp-for="Input.Email" class="form-control" />
+                <span asp-validation-for="Input.Email" class="field-validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.IssueType">What happened?</label>
+                <select asp-for="Input.IssueType" class="form-control" asp-items="Html.GetEnumSelectList<IssueType>()"></select>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Description">Tell us a little more</label>
+                <textarea asp-for="Input.Description" class="form-control"></textarea>
+                <span asp-validation-for="Input.Description" class="field-validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Photo">Photo of the plant (optional but helps a lot)</label>
+                <input asp-for="Input.Photo" type="file" accept="image/*" class="form-control" />
+            </div>
+            <button type="submit" class="btn btn-primary">Send report</button>
+        </form>
+    }
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

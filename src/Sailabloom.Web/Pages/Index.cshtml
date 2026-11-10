@@ -1,0 +1,67 @@
+@page
+@model Sailabloom.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home";
+}
+
+<section class="hero">
+    <h1>Sailabloom</h1>
+    <p class="tagline">by Sailaja — Every Garden Begins with Love.</p>
+    <p>Healthy, home-grown plants raised with care in our greenhouse and shipped
+       (or ready for pickup) straight to your home.</p>
+    <p>
+        <a class="btn btn-primary" asp-page="/Shop">Shop plants</a>
+        <a class="btn btn-secondary" asp-page="/Guarantee">Our Arrive-Alive Guarantee</a>
+    </p>
+</section>
+
+<section class="page-section">
+    <h2>Featured plants</h2>
+    @if (Model.Featured.Count == 0)
+    {
+        <p class="muted">The greenhouse shelves are being restocked — please check back soon.</p>
+    }
+    else
+    {
+        <div class="plant-grid">
+            @foreach (var plant in Model.Featured)
+            {
+                <article class="plant-card">
+                    <img src="@plant.ImageUrl" alt="@plant.Name" />
+                    <div class="plant-card-body">
+                        <span class="category">@plant.Category</span>
+                        <h3>@plant.Name</h3>
+                        <p class="description">@plant.Description</p>
+                        <div class="price-row">
+                            <span class="price">@plant.Price.ToString("C")</span>
+                            @if (plant.Stock <= 0)
+                            {
+                                <span class="badge badge-out">Sold out</span>
+                            }
+                            else if (plant.Stock <= 3)
+                            {
+                                <span class="badge badge-low">Only @plant.Stock left</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-in">In stock</span>
+                            }
+                        </div>
+                        <form method="post" asp-page-handler="AddToCart" asp-route-plantId="@plant.Id">
+                            <button type="submit" class="btn btn-primary" disabled="@(plant.Stock <= 0)">Add to cart</button>
+                        </form>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>
+
+<section class="page-section card">
+    <h2>Grown at home, with love</h2>
+    <p>Every Sailabloom plant starts in Sailaja's home greenhouse — potted by hand,
+       checked leaf by leaf before it ships, and backed by our
+       <a asp-page="/Guarantee">Arrive-Alive Guarantee</a>: if a plant arrives dead or
+       damaged, tell us within 48 hours with a photo and we will replace it or refund
+       you in full, shipping included.</p>
+</section>

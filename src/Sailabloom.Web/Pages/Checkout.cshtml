@@ -1,0 +1,120 @@
+@page
+@model Sailabloom.Web.Pages.CheckoutModel
+@{
+    ViewData["Title"] = "Checkout";
+}
+
+<section class="page-section">
+    <h1>Checkout</h1>
+
+    <div class="grid-2">
+        <form method="post" class="card">
+            <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+
+            <h2>Your details</h2>
+            <div class="form-group">
+                <label asp-for="Input.CustomerName">Full name</label>
+                <input asp-for="Input.CustomerName" class="form-control" />
+                <span asp-validation-for="Input.CustomerName" class="field-validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Email">Email</label>
+                <input asp-for="Input.Email" class="form-control" />
+                <span asp-validation-for="Input.Email" class="field-validation-error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Input.Address">Delivery address <span class="muted">(not needed for pickup at home)</span></label>
+                <textarea asp-for="Input.Address" class="form-control"></textarea>
+                <span asp-validation-for="Input.Address" class="field-validation-error"></span>
+            </div>
+
+            <h2>Payment</h2>
+            <label class="radio-card">
+                <input type="radio" asp-for="Input.PaymentMethod" value="@PaymentMethod.Card" />
+                <span>
+                    <span class="radio-title">Credit card</span><br />
+                    <span class="radio-note">Demo checkout — no real charge. Only the card brand and last 4 digits are stored.</span>
+                </span>
+            </label>
+            <div id="cardFields" class="form-group">
+                <label asp-for="Input.CardNumber">Card number (demo)</label>
+                <input asp-for="Input.CardNumber" class="form-control" placeholder="4242 4242 4242 4242" autocomplete="off" />
+                <span asp-validation-for="Input.CardNumber" class="field-validation-error"></span>
+            </div>
+            <label class="radio-card">
+                <input type="radio" asp-for="Input.PaymentMethod" value="@PaymentMethod.Zelle" />
+                <span>
+                    <span class="radio-title">Zelle</span><br />
+                    <span class="radio-note">Send your payment by Zelle after ordering; your order is marked “payment pending verification”.</span>
+                </span>
+            </label>
+            <div id="zelleInfo" class="alert alert-success" style="display:none;">
+                Send your Zelle payment to <strong>@Model.ZelleNumber</strong>, and please include your order number once you have it.
+            </div>
+            <label class="radio-card">
+                <input type="radio" asp-for="Input.PaymentMethod" value="@PaymentMethod.Cash" />
+                <span>
+                    <span class="radio-title">Cash at pickup</span><br />
+                    <span class="radio-note">Pay in cash when you pick up your plants at our home. Cash orders are pickup only.</span>
+                </span>
+            </label>
+
+            <h2>Delivery</h2>
+            <label class="radio-card">
+                <input type="radio" asp-for="Input.Fulfillment" value="@FulfillmentMethod.StandardShipping" />
+                <span>
+                    <span class="radio-title">Standard shipping — $15.00</span><br />
+                    <span class="radio-note">Carefully packed and shipped to your address.</span>
+                </span>
+            </label>
+            <label class="radio-card">
+                <input type="radio" asp-for="Input.Fulfillment" value="@FulfillmentMethod.PrepaidLabel" />
+                <span>
+                    <span class="radio-title">I'll share a shipping label — $0</span><br />
+                    <span class="radio-note">You send us your pre-paid shipping label after ordering.</span>
+                </span>
+            </label>
+            <label class="radio-card">
+                <input type="radio" asp-for="Input.Fulfillment" value="@FulfillmentMethod.Pickup" />
+                <span>
+                    <span class="radio-title">Pickup at home — $0</span><br />
+                    <span class="radio-note">Collect your plants from our home; no address needed.</span>
+                </span>
+            </label>
+
+            <button type="submit" class="btn btn-primary">Place order</button>
+        </form>
+
+        <aside class="card" id="orderSummary" data-subtotal="@Model.Subtotal.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)">
+            <h2>Order summary</h2>
+            <table class="table">
+                <tbody>
+                    @foreach (var item in Model.Items)
+                    {
+                        <tr>
+                            <td>@item.Name × @item.Quantity</td>
+                            <td>@((item.Price * item.Quantity).ToString("C"))</td>
+                        </tr>
+                    }
+                    <tr>
+                        <td>Subtotal</td>
+                        <td>@Model.Subtotal.ToString("C")</td>
+                    </tr>
+                    <tr>
+                        <td>Shipping</td>
+                        <td id="shippingLine">$15.00</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total</strong></td>
+                        <td><strong id="totalLine">@((Model.Subtotal + 15m).ToString("C"))</strong></td>
+                    </tr>
+                </tbody>
+            </table>
+            <p class="muted">Every plant is covered by our <a asp-page="/Guarantee">Arrive-Alive Guarantee</a>.</p>
+        </aside>
+    </div>
+</section>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

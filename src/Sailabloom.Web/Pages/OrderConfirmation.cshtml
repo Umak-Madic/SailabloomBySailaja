@@ -1,0 +1,40 @@
+@page
+@model Sailabloom.Web.Pages.OrderConfirmationModel
+@{
+    ViewData["Title"] = "Order confirmed";
+}
+
+<section class="page-section">
+    @if (Model.Order is null)
+    {
+        <div class="card">
+            <h1>We couldn't find that order</h1>
+            <p class="muted">If you just placed an order and need help, please contact us with your order number.</p>
+            <p><a class="btn btn-primary" asp-page="/Shop">Back to the shop</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="card">
+            <h1>Thank you — order #@Model.Order.Id confirmed</h1>
+            <p>Thanks, @Model.Order.CustomerName! Your plants are being prepared with care.</p>
+            <table class="table">
+                <tbody>
+                    <tr><td><strong>Total</strong></td><td>@Model.Order.Total.ToString("C") (plants @Model.Order.Subtotal.ToString("C") + shipping @Model.Order.ShippingCost.ToString("C"))</td></tr>
+                    <tr><td><strong>Payment</strong></td><td>@Model.Order.PaymentMethod — @Model.Order.PaymentStatusText @if (Model.Order.CardLast4 is not null) { <span>(@Model.Order.CardBrand •••• @Model.Order.CardLast4)</span> }</td></tr>
+                    <tr><td><strong>Delivery</strong></td><td>@Model.Order.Fulfillment</td></tr>
+                    <tr><td><strong>Status</strong></td><td>@Model.Order.Status</td></tr>
+                </tbody>
+            </table>
+            @if (Model.Order.PaymentMethod == PaymentMethod.Zelle)
+            {
+                <div class="alert alert-success" style="margin-top:16px;">
+                    Please send your Zelle payment to <strong>@Model.ZelleNumber</strong> and include order #@Model.Order.Id in the note.
+                </div>
+            }
+            <p class="muted">If a plant arrives dead or damaged, our
+               <a asp-page="/Guarantee">Arrive-Alive Guarantee</a> has you covered — report it within 48 hours with a photo.</p>
+            <p><a class="btn btn-primary" asp-page="/Shop">Continue shopping</a></p>
+        </div>
+    }
+</section>

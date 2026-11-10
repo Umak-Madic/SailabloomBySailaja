@@ -1,0 +1,69 @@
+@page
+@model Sailabloom.Web.Pages.ShopModel
+@{
+    ViewData["Title"] = "Shop";
+}
+
+<section class="page-section">
+    <h1>Shop plants</h1>
+
+    <form method="get" class="card" style="margin-bottom:22px;">
+        <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end;">
+            <div class="form-group" style="flex:2; min-width:200px; margin-bottom:0;">
+                <label for="Search">Search</label>
+                <input class="form-control" type="search" id="Search" name="Search" value="@Model.Search" placeholder="Try “monstera”…" />
+            </div>
+            <div class="form-group" style="flex:1; min-width:160px; margin-bottom:0;">
+                <label for="Category">Category</label>
+                <select class="form-control" id="Category" name="Category">
+                    <option value="">All categories</option>
+                    @foreach (var category in Model.Categories)
+                    {
+                        <option value="@category" selected="@(Model.Category == category)">@category</option>
+                    }
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Search</button>
+            <a class="btn btn-secondary" asp-page="/Shop">Clear</a>
+        </div>
+    </form>
+
+    @if (Model.Plants.Count == 0)
+    {
+        <p class="muted">No plants match that search yet — try a different word or category.</p>
+    }
+    else
+    {
+        <div class="plant-grid">
+            @foreach (var plant in Model.Plants)
+            {
+                <article class="plant-card">
+                    <img src="@plant.ImageUrl" alt="@plant.Name" />
+                    <div class="plant-card-body">
+                        <span class="category">@plant.Category</span>
+                        <h3>@plant.Name</h3>
+                        <p class="description">@plant.Description</p>
+                        <div class="price-row">
+                            <span class="price">@plant.Price.ToString("C")</span>
+                            @if (plant.Stock <= 0)
+                            {
+                                <span class="badge badge-out">Sold out</span>
+                            }
+                            else if (plant.Stock <= 3)
+                            {
+                                <span class="badge badge-low">Only @plant.Stock left</span>
+                            }
+                            else
+                            {
+                                <span class="badge badge-in">@plant.Stock in stock</span>
+                            }
+                        </div>
+                        <form method="post" asp-page-handler="AddToCart" asp-route-plantId="@plant.Id">
+                            <button type="submit" class="btn btn-primary" disabled="@(plant.Stock <= 0)">Add to cart</button>
+                        </form>
+                    </div>
+                </article>
+            }
+        </div>
+    }
+</section>

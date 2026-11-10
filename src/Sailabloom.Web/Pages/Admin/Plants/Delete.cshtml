@@ -1,0 +1,28 @@
+@page "{id:int}"
+@model Sailabloom.Web.Pages.Admin.Plants.DeleteModel
+@{
+    ViewData["Title"] = "Admin — Delete plant";
+}
+
+<section class="page-section">
+    <h1>Delete plant</h1>
+
+    @if (Model.Plant is null)
+    {
+        <div class="card">
+            <p>That plant no longer exists.</p>
+            <p><a class="btn btn-secondary" asp-page="/Admin/Plants/Index">Back to plants</a></p>
+        </div>
+    }
+    else
+    {
+        <div class="card" style="max-width:560px;">
+            <p>Delete <strong>@Model.Plant.Name</strong> (@Model.Plant.Category, @Model.Plant.Price.ToString("C"), stock @Model.Plant.Stock) from the catalog?</p>
+            <p class="muted">Past orders keep their own snapshots, so sales history is not affected.</p>
+            <form method="post">
+                <button type="submit" class="btn btn-danger">Yes, delete it</button>
+                <a class="btn btn-secondary" asp-page="/Admin/Plants/Index">Cancel</a>
+            </form>
+        </div>
+    }
+</section>
